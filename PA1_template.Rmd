@@ -11,6 +11,7 @@ Report on Activity Observations
 ## Loading and preprocessing the data
 
 
+
 ```{r hide=TRUE}
 library(dplyr)
 library(ggplot2)
@@ -21,7 +22,6 @@ setwd("I:/rprog-Course5-Week2")
 tab1 <- read.csv(file="activity.csv",sep=",",stringsAsFactors = FALSE) %>% mutate(obsDate=as.Date(date,format="%m/%d/%Y"))
 ```
 
-
 ## What is mean total number of steps taken per day?
 
 
@@ -29,11 +29,11 @@ tab1 <- read.csv(file="activity.csv",sep=",",stringsAsFactors = FALSE) %>% mutat
 
 ```{r}
 by_date <- tab1 %>% group_by(obsDate) %>% summarize(totsteps=sum(steps))
-g <- ggplot(tab1, aes(obsDate))
-maintitle <- "Total Daily Steps, October - November 2012 "
-mn_steps1 <- round(mean(by_date$totsteps,na.rm=TRUE),2)
-md_steps1 <- round(median(by_date$totsteps,na.rm=TRUE),2)
-g+ geom_histogram(aes(weight=steps),bins=61)+ geom_hline(yintercept=mn_steps1,col="blue") + xlab(" ") +ylab("Total Steps") + ggtitle(maintitle) 
+g <- ggplot(by_date, aes(totsteps))
+maintitle <- "Total Daily Steps, October through November 2012 "
+mn_steps1 <- mean(by_date$totsteps,na.rm=TRUE)
+md_steps1 <- median(by_date$totsteps,na.rm=TRUE)
+g+ geom_histogram(bins=20) +ylab("Count") + ggtitle(maintitle)
 ```
 ```{r echo=FALSE}
 paste("mean steps = ", mn_steps1 )
@@ -53,30 +53,34 @@ step_max <- round(by_intvl[row_of_max,"int_mn"],2)
 ```{r echo=FALSE}
 paste("Maximum average daily steps is ", step_max, "and occurs at interval ",max_int)
 ```
+
 ## impute missing values and make new histogram
 To impute missing values, the average of non-missing values was computed at each interval. Then the appropriate mean value was substituted for each missing value.
 
 ```{r echo=FALSE}
 paste("Count of missing step values = ", (table(is.na(tab1$steps))[2]))
 ```
-```{r }
+
+```{r}
 int_mn <- filter(tab1,steps>=0) %>% group_by(interval) %>% summarize(replc=mean(steps,na.rm=TRUE))
+
 tab2 <- merge(tab1,int_mn)
 tab3 <- tab2 %>% mutate(steps1=ifelse(is.na(steps),replc,steps))
-by_date <- tab3 %>% group_by(obsDate) %>% summarize(totsteps=sum(steps1))
-k <- ggplot(tab3, aes(obsDate))
-maintitle <- "Total Daily Steps, Oct-Nov 2012, mean imputed for missing values "
-md_steps <- round(median(by_date$totsteps,na.rm=TRUE),2)
-mn_steps <- round(mean(by_date$totsteps,na.rm=TRUE),2)
-k + geom_histogram(aes(weight=steps1),bins=61)+ geom_hline(yintercept=mn_steps,col="blue") + xlab(" ") + ylab("Total Steps") + ggtitle(maintitle)
+ bydate <- tab3 %>% group_by(obsDate) %>% summarize(totsteps=sum(steps1))
+k <- ggplot(bydate, aes(totsteps))
+maintitle <- "Total Daily Steps, Oct-Nov 2012, missing values imputed "
+ mdsteps <- round(median(bydate$totsteps,na.rm=TRUE),2)
+ mnsteps <- round(mean(bydate$totsteps,na.rm=TRUE),2)
+k + geom_histogram(bins=20)+ xlab(" ") +ylab("Count") + ggtitle(maintitle)
 ```
 
 
 WIth the imputed values, the mean is equal to the median.
-
 ```{r echo=FALSE}
-paste("Mean steps after substituting imputed values for NAs = ", mn_steps)
-paste("Median steps after substituting imputed values for NAs = ", md_steps)
+
+paste("Median steps after substituting imputed values for NAs = ", mdsteps)
+paste("Mean steps after substituting imputed values for NAs = ", mnsteps)
+
 ```                
 ## Are there differences in activity patterns between weekdays and weekends?
  

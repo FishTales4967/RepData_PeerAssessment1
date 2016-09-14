@@ -17,15 +17,17 @@ What is mean total number of steps taken per day?
 Create Histogram of mean steps per day when missing values are excluded.
 
     by_date <- tab1 %>% group_by(obsDate) %>% summarize(totsteps=sum(steps))
-    g <- ggplot(tab1, aes(obsDate))
-    maintitle <- "Total Daily Steps, October - November 2012 "
-    mn_steps1 <- round(mean(by_date$totsteps,na.rm=TRUE),2)
-    md_steps1 <- round(median(by_date$totsteps,na.rm=TRUE),2)
-    g+ geom_histogram(aes(weight=steps),bins=61)+ geom_hline(yintercept=mn_steps1,col="blue") + xlab(" ") +ylab("Total Steps") + ggtitle(maintitle) 
+    g <- ggplot(by_date, aes(totsteps))
+    maintitle <- "Total Daily Steps, October through November 2012 "
+    mn_steps1 <- mean(by_date$totsteps,na.rm=TRUE)
+    md_steps1 <- median(by_date$totsteps,na.rm=TRUE)
+    g+ geom_histogram(bins=20) +ylab("Count") + ggtitle(maintitle)
+
+    ## Warning: Removed 8 rows containing non-finite values (stat_bin).
 
 ![](PA1_template_files/figure-markdown_strict/unnamed-chunk-3-1.png)
 
-    ## [1] "mean steps =  10766.19"
+    ## [1] "mean steps =  10766.1886792453"
 
     ## [1] "median steps =  10765"
 
@@ -55,22 +57,23 @@ each missing value.
     ## [1] "Count of missing step values =  2304"
 
     int_mn <- filter(tab1,steps>=0) %>% group_by(interval) %>% summarize(replc=mean(steps,na.rm=TRUE))
+
     tab2 <- merge(tab1,int_mn)
     tab3 <- tab2 %>% mutate(steps1=ifelse(is.na(steps),replc,steps))
-    by_date <- tab3 %>% group_by(obsDate) %>% summarize(totsteps=sum(steps1))
-    k <- ggplot(tab3, aes(obsDate))
-    maintitle <- "Total Daily Steps, Oct-Nov 2012, mean imputed for missing values "
-    md_steps <- round(median(by_date$totsteps,na.rm=TRUE),2)
-    mn_steps <- round(mean(by_date$totsteps,na.rm=TRUE),2)
-    k + geom_histogram(aes(weight=steps1),bins=61)+ geom_hline(yintercept=mn_steps,col="blue") + xlab(" ") + ylab("Total Steps") + ggtitle(maintitle)
+     bydate <- tab3 %>% group_by(obsDate) %>% summarize(totsteps=sum(steps1))
+    k <- ggplot(bydate, aes(totsteps))
+    maintitle <- "Total Daily Steps, Oct-Nov 2012, missing values imputed "
+     mdsteps <- round(median(bydate$totsteps,na.rm=TRUE),2)
+     mnsteps <- round(mean(bydate$totsteps,na.rm=TRUE),2)
+    k + geom_histogram(bins=20)+ xlab(" ") +ylab("Count") + ggtitle(maintitle)
 
 ![](PA1_template_files/figure-markdown_strict/unnamed-chunk-8-1.png)
 
 WIth the imputed values, the mean is equal to the median.
 
-    ## [1] "Mean steps after substituting imputed values for NAs =  10766.19"
-
     ## [1] "Median steps after substituting imputed values for NAs =  10766.19"
+
+    ## [1] "Mean steps after substituting imputed values for NAs =  10766.19"
 
 Are there differences in activity patterns between weekdays and weekends?
 -------------------------------------------------------------------------
